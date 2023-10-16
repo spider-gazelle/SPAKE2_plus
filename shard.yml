@@ -1,0 +1,23 @@
+name: spake2_plus
+version: 1.0.0
+
+dependencies:
+  hkdf:
+    github: spider-gazelle/hkdf
+
+  # NIST graph support
+  openssl_ext:
+    github: spider-gazelle/openssl_ext
+
+  # alternative mac algorithm
+  cmac:
+    github: spider-gazelle/cmac
+
+  # alternative graph from NIST
+  ed25519:
+    github: spider-gazelle/ed25519
+
+authors:
+  - Stephen von Takach <steve@place.tech>
+
+license: MIT
