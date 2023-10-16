@@ -25,7 +25,7 @@ module SPAKE2Plus
   MATTER_DEFAULT = SPAKE2Plus::Algorithms.new(Curve::P256, OpenSSL::Algorithm::SHA256, MAC::HMAC)
 
   def self.new(context : String | Bytes, w0 : BigInt, algorithm : Algorithms = MATTER_DEFAULT) : SPAKE2Plus::Protocol
-    random = Random.new.rand(BigInt.new...curve.prime_modulus.to_big_i)
+    random = Random.new.rand(BigInt.new...algorithm.curve_group.prime_modulus.to_big_i)
     Protocol.new(algorithm, context, random, w0)
   end
 end

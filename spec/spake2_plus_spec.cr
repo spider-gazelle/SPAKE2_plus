@@ -253,10 +253,44 @@ module SPAKE2Plus
     end
 
     it "works with Matter pin codes" do
-      # just putting this here to remind me how matter encodes passcodes into the context
-      pin = 12345777_u32
-      context = IO::Memory.new
-      context.write_bytes(pin, IO::ByteFormat::LittleEndian)
+      # the configuration matter uses
+      algorithm = SPAKE2Plus::Algorithms.new(:p256, :sha256, :hmac)
+
+      # As part of registration we swap salt and iteration params
+      # PBKDF Param Request
+      iterations = Random.new.rand(1000..100_000)
+      salt = Random.new.random_bytes(Random.new.rand(16..32))
+
+      # both initiator and responder encode the password / pin
+      # for Matter this is a UInt32 passcode encoded in little endian
+      passcode = 1122334455_u32
+      io = IO::Memory.new
+      io.write_bytes(passcode, IO::ByteFormat::LittleEndian)
+      context = io.to_slice
+
+      # > The Initiator provides PAKE Contribution
+      # ==========================================
+      w0, w1 = algorithm.compute_w0_w1(context, salt, iterations)
+      initiator = SPAKE2Plus.new(context, w0, algorithm)
+      x = initiator.compute_x # send x as pake1 to responder
+
+      # < Responder provides PAKE Contribution and verification
+      # =======================================================
+      w0, l = algorithm.compute_w0_l(context, salt, iterations)
+      responder = SPAKE2Plus.new(context, w0, algorithm)
+      y = responder.compute_y
+      _ke, h_ay, resp_verify = responder.compute_secret_and_verifiers_from_x(l, x, y)
+      # send y, resp_verify as pake2 to initiator
+
+      # > The Initiator verifies and sends verifier
+      # ===========================================
+      _ke, init_verify, h_bx = initiator.compute_secret_and_verifiers_from_y(w1, x, y)
+      raise "init verification failed" unless h_bx == resp_verify
+      # send init_verify as pake3 to responder
+
+      # < Responder validates and sends PakeFinished
+      # ============================================
+      raise "resp verification failed" unless h_ay == init_verify
     end
   end
 end
