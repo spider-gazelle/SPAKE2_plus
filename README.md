@@ -42,8 +42,9 @@ algorithm = SPAKE2Plus::Algorithms.new(:p256, :sha256, :hmac)
 
 # As part of registration we swap salt and iteration params
 # PBKDF Param Request
-iterations = Random.new.rand(1000..100_000)
-salt = Random.new.random_bytes(Random.new.rand(16..32))
+random = Random.new
+iterations = random.rand(1000..100_000)
+salt = random.random_bytes(random.rand(16..32))
 
 # both initiator and responder encode the password / pin
 # for Matter this is a UInt32 passcode encoded in little endian
