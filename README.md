@@ -6,8 +6,6 @@ A crystal lang implementation of SPAKE2+
 
 This is the specific draft used by Matter protocol
 
-
-
 ## Installation
 
 1. Add the dependency to your `shard.yml`:
